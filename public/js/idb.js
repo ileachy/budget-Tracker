@@ -1,14 +1,14 @@
 let db;
 
-const request = indexedDB.open("budget-tracker", 1);
+const req = indexedDB.open("budget-tracker", 1);
 
-request.onupgradeneeded = function (event) {
+req.onupgradeneeded = function (event) {
   const db = event.target.result;
 
   db.createObjectStore("budget_tracker", { autoIncrement: true });
 };
 
-request.onsuccess = function (event) {
+req.onsuccess = function (event) {
   const db = event.target.result;
 
   if (navigator.onLine) {
@@ -16,26 +16,26 @@ request.onsuccess = function (event) {
   }
 };
 
-request.onerror = function (event) {
+req.onerror = function (event) {
   console.log(event.target.errorCode);
 };
 
 function saveRecord(record) {
   const transaction = db.transaction(["budget_tracker"], "readwrite");
-  const budgetObjectStore = transaction.objectStore("budget_tracker");
-  budgetObjectStore.add(record);
+  const budgetObjStore = transaction.objectStore("budget_tracker");
+  budgetObjStore.add(record);
 }
 
 function loadBudget() {
   const transaction = db.transaction(["budget_tracker"], "readwrite");
-  const budgetObjectStore = transaction.objectStore("budget_tracker");
-  const getAll = budgetObjectStore.getAll();
+  const budgetObjStore = transaction.objectStore("budget_tracker");
+  const getAllBudg = budgetObjStore.getAllBudg();
 
-  getAll.onsuccess = function () {
-    if (getAll.result.length > 0) {
+  getAllBudg.onsuccess = function () {
+    if (getAllBudg.result.length > 0) {
       fetch("/api/transaction", {
         method: "POST",
-        body: JSON.stringify(getAll.result),
+        body: JSON.stringify(getAllBudg.result),
         headers: {
           Accept: "application/json",
           "Content-Type": "application/json",
@@ -47,8 +47,8 @@ function loadBudget() {
             throw new Error(serverResponse);
           }
           const transaction = db.transaction(["budget_tracker"], "readwrite");
-          const budgetObjectStore = transaction.objectStore("budget_tracker");
-          budgetObjectStore.clear();
+          const budgetObjStore = transaction.objectStore("budget_tracker");
+          budgetObjStore.clear();
         })
         .catch((err) => {
           console.log(err);
